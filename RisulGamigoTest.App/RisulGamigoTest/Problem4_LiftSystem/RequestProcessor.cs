@@ -18,70 +18,6 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         public bool HasUpRequest => UpRequests.Count(a => a) > 0;
         public bool HasDownRequest => DownRequests.Count(a => a) > 0;
 
-        public int GetNearestUpRequest(int currentFloor)
-        {
-            return GetNearestRequest(UpRequests, currentFloor);
-        }
-
-        public int GetNearestDownRequest(int currentFloor)
-        {
-            return GetNearestRequest(DownRequests, currentFloor);
-        }
-
-        public int GetNearestRequest(bool[] request, int currentFloor)
-        {
-            var hasRequestInUpperFloor = false;
-            var hasRequestInLowerFloor = false;
-
-            var upperFloorPointer = currentFloor + 1;
-            var lowerFloorPointer = currentFloor - 1;
-            while (upperFloorPointer < request.Length)
-            {
-                if (request[upperFloorPointer])
-                {
-                    hasRequestInUpperFloor = true;
-                    break;
-                }
-
-                upperFloorPointer++;
-            }
-
-            while (lowerFloorPointer > 0)
-            {
-                if (request[lowerFloorPointer])
-                {
-                    hasRequestInLowerFloor = true;
-                    break;
-                }
-
-                lowerFloorPointer--;
-            }
-
-            if (hasRequestInUpperFloor && hasRequestInLowerFloor)
-            {
-                var distanceFromCurrentToUpper = Math.Abs(currentFloor - upperFloorPointer);
-                var distanceFromCurrentToLower = Math.Abs(currentFloor - lowerFloorPointer);
-
-                if (distanceFromCurrentToLower < distanceFromCurrentToUpper)
-                {
-                    return lowerFloorPointer;
-                }
-                else
-                {
-                    return upperFloorPointer;
-                }
-            }
-            else if (hasRequestInLowerFloor)
-            {
-                return lowerFloorPointer;
-            }
-            else if (hasRequestInUpperFloor)
-            {
-                return upperFloorPointer;
-            }
-
-            return currentFloor;
-        }
 
         public void SetRequestStatus(Direction direction,int floor, bool state)
         {
@@ -89,35 +25,12 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             if (direction == Direction.Down) DownRequests[floor] = state;
         }
 
-        public bool HasAnyRequestsInDirection(int motorCurrentFloor, Direction direction)
-        {
-            //if lift is going up, look for true index starting from current floor towards the top floor
-            if (direction == Direction.Up)
-            {
-                while (motorCurrentFloor < UpRequests.Length)
-                {
-                    if (UpRequests[motorCurrentFloor]) return true;
-                    motorCurrentFloor++;
-                }
-            }else if (direction == Direction.Down)
-            {
-                // if going down, look for down request from this floor towards 0
-                while (motorCurrentFloor > 0)
-                {
-                    if (DownRequests[motorCurrentFloor]) return true;
-                    motorCurrentFloor--;
-                }
-            }
-
-            // no request to be processed, become idle
-            return false;
-        }
 
         // Requests from upper floors
         
-        public int GetUpperFloorUpRequests(int currnetFloor)
+        public int GetUpperFloorUpRequests(int currentFloor)
         {
-            for (int i = currnetFloor; i < UpRequests.Length; i++)
+            for (int i = currentFloor; i < UpRequests.Length; i++)
             {
                 if (UpRequests[i]) return i;
             }
@@ -125,7 +38,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             return -1;
         }
 
-        public int GetUpperFloorDownReqeust(int currentFloor)
+        public int GetUpperFloorDownRequest(int currentFloor)
         {
             for (int i = currentFloor; i < floorHeight; i++)
             {
@@ -155,6 +68,40 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             }
 
             return -1;
+        }
+
+
+        public int GetNearestRequestInAnyDirection(int currentFloor)
+        {
+            var upperFloorUpRequest = GetUpperFloorUpRequests(currentFloor);
+            var upperFloorDownRequest = GetUpperFloorDownRequest(currentFloor);
+            
+            var lowerFloorUpRequest = GetLowerFloorUpRequests(currentFloor);
+            var lowerFloorDownRequest = GetLowerFloorDownRequests(currentFloor);
+
+            var destination = int.MaxValue;
+            if (upperFloorUpRequest != -1)
+            {
+                destination = upperFloorUpRequest;
+            }
+
+            if (upperFloorDownRequest != -1)
+            {
+                destination = Math.Min(destination, upperFloorDownRequest);
+            }
+
+            if (lowerFloorUpRequest != -1)
+            {
+                destination = Math.Min(destination, lowerFloorUpRequest);
+            }
+
+            if (lowerFloorDownRequest != -1)
+            {
+                destination = Math.Min(destination, lowerFloorDownRequest);
+            }
+
+            if (destination == int.MaxValue) return -1;
+            return destination;
         }
     }
 }

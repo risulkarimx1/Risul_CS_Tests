@@ -41,7 +41,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                     // if no up request in upper floor, is there any down request in upper floor
                     else
                     {
-                        destination = _processor.GetUpperFloorDownReqeust(_motor.CurrentFloor);
+                        destination = _processor.GetUpperFloorDownRequest(_motor.CurrentFloor);
                         if (destination != -1)
                         {
                             MoveTowards(destination, Direction.Down);
@@ -92,7 +92,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                         destination = _processor.GetUpperFloorUpRequests(_motor.CurrentFloor);
                         if (destination == -1)
                         {
-                            destination = _processor.GetUpperFloorDownReqeust(_motor.CurrentFloor);
+                            destination = _processor.GetUpperFloorDownRequest(_motor.CurrentFloor);
                         }
 
                         if (destination != -1)
@@ -132,40 +132,17 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
         private void GetDirectionFromRequestLookUp()
         {
-            // if processor has up request, go up
-            if (_processor.HasUpRequest)
-            {
-                var nearestUpRequestFloor = _processor.GetNearestUpRequest(_motor.CurrentFloor);
-                // if the request is coming from a down floor, the direction should become down
-                // else up
-                if (nearestUpRequestFloor < _motor.CurrentFloor)
-                {
-                    _motor.CurrentDirection = Direction.Down;
-                }
-                else
-                {
-                    _motor.CurrentDirection = Direction.Up;
-                }
-            }
-            // else if process has down request, go down
-            else if (_processor.HasDownRequest)
-            {
-                // if request is coming from a upper floor, direction should be up,
-                // else down
-                var nearestDownRequest = _processor.GetNearestDownRequest(_motor.CurrentFloor);
-                if (nearestDownRequest < _motor.CurrentFloor)
-                {
-                    _motor.CurrentDirection = Direction.Down;
-                }
-                else
-                {
-                    _motor.CurrentDirection = Direction.Up;
-                }
-            }
-            // else remain idle
-            else
+            var nearestRequest = _processor.GetNearestRequestInAnyDirection(_motor.CurrentFloor);
+            if (nearestRequest == -1)
             {
                 _motor.CurrentDirection = Direction.Idle;
+            }else if (_motor.CurrentFloor < nearestRequest)
+            {
+                _motor.CurrentDirection = Direction.Up;
+            }
+            else
+            {
+                _motor.CurrentDirection = Direction.Down;
             }
         }
 

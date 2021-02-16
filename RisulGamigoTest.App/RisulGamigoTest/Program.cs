@@ -5,26 +5,28 @@ namespace RisulGamigoTest
 {
     class Program
     {
+        public static Random random = new Random();
         static void Main(string[] args)
         {
-            var elevatorManager = new ElevatorManager();
             
+            var liftController = new LiftController();
             
+
             while (true)
             {
                 if (Console.ReadKey().Key == ConsoleKey.A)
                 {
-                    elevatorManager.SimulateOperation(3, Direction.Up);
+                    liftController.SummonButtonPushed(3, Direction.Up);
                 }
 
                 if (Console.ReadKey().Key == ConsoleKey.B)
                 {
-                    elevatorManager.SimulateOperation(9, Direction.Up);
+                    liftController.SummonButtonPushed(9, Direction.Up);
                 }
 
-                else if (Console.ReadKey().Key == ConsoleKey.Escape)
+                if (Console.ReadKey().Key == ConsoleKey.C)
                 {
-                    elevatorManager.Dispose();
+                    liftController.FloorButtonPushed(random.Next(0, 9));
                 }
             }
         }

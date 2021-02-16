@@ -11,13 +11,14 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         private RequestProcessor _processor;
         private IElevatorMotor _motor;
 
+        public bool _isDoorOpen = false;
+
         public LiftController()
         {
             _processor = new RequestProcessor();
             _motor = new ElevatorMotor();
-            _motor.CurrentFloor = 5;
             _motor.CurrentDirection = Direction.Idle;
-            Task.Factory.StartNew(() => Loop());
+            Task.Factory.StartNew(Loop);
         }
 
         public async Task Loop()
@@ -36,7 +37,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                     // is there any up request in upper floor
                     if (destination != -1)
                     {
-                        MoveTowards(destination, Direction.Up);
+                        await MoveTowardsAsync(destination, Direction.Up).ConfigureAwait(false);
                     }
                     // if no up request in upper floor, is there any down request in upper floor
                     else
@@ -44,7 +45,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                         destination = _processor.GetUpperFloorDownRequest(_motor.CurrentFloor);
                         if (destination != -1)
                         {
-                            MoveTowards(destination, Direction.Down);
+                            await MoveTowardsAsync(destination, Direction.Down).ConfigureAwait(false);
                         }
                     }
 
@@ -66,7 +67,6 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                         {
                             _motor.CurrentDirection = Direction.Idle;
                         }
-                        
                     }
                 }
 
@@ -75,17 +75,17 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                     var destination = _processor.GetLowerFloorDownRequests(_motor.CurrentFloor);
                     if (destination != -1)
                     {
-                        MoveTowards(destination, Direction.Down);
+                        await MoveTowardsAsync(destination, Direction.Down).ConfigureAwait(false);
                     }
                     else
                     {
                         destination = _processor.GetLowerFloorUpRequests(_motor.CurrentFloor);
                         if (destination != -1)
                         {
-                            MoveTowards(destination, Direction.Up);
+                            await MoveTowardsAsync(destination, Direction.Up).ConfigureAwait(false);
                         }
                     }
-                    
+
                     // if no request in down direction, try set the direction up
                     if (destination == -1)
                     {
@@ -107,17 +107,25 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                     }
                 }
 
-                Console.WriteLine(
-                    $"[{DateTime.Now.Minute}:{DateTime.Now.Second}] - At Floor: {_motor.CurrentFloor}, Direction: {_motor.CurrentDirection}");
+                if (!_isDoorOpen)
+                    Console.WriteLine($"[{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}] " +
+                                      $"- At Floor: {_motor.CurrentFloor}, Direction: {_motor.CurrentDirection}");
+
                 await Task.Delay(1000).ConfigureAwait(false);
             }
         }
 
-        public void MoveTowards(int destination, Direction direction)
+        private async Task MoveTowardsAsync(int destination, Direction direction)
         {
+            if (_isDoorOpen) return;
+
             if (destination == _motor.CurrentFloor)
             {
-                Console.WriteLine("Reached destination");
+                Console.WriteLine("Reached destination: Door Open.. Waiting For 5s");
+                _isDoorOpen = true;
+                await Task.Delay(5000).ConfigureAwait(false);
+                _isDoorOpen = false;
+                Console.WriteLine("Door Closed");
                 _processor.SetRequestStatus(direction, _motor.CurrentFloor, false);
             }
             else if (destination < _motor.CurrentFloor)
@@ -136,7 +144,8 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             if (nearestRequest == -1)
             {
                 _motor.CurrentDirection = Direction.Idle;
-            }else if (_motor.CurrentFloor < nearestRequest)
+            }
+            else if (_motor.CurrentFloor < nearestRequest)
             {
                 _motor.CurrentDirection = Direction.Up;
             }
@@ -162,7 +171,15 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
         public void FloorButtonPushed(int floor)
         {
-            
+            Console.WriteLine($"Button pushed for {floor}");
+            if (_motor.CurrentFloor < floor)
+            {
+                _processor.SetRequestStatus(Direction.Up, floor, true);
+            }
+            else
+            {
+                _processor.SetRequestStatus(Direction.Down, floor, true);
+            }
         }
     }
 }

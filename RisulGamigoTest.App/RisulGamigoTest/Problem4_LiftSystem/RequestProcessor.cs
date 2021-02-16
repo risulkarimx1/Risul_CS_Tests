@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Linq;
 
 namespace RisulGamigoTest.Problem4_LiftSystem
 {
     public class RequestProcessor
     {
         public int floorHeight = 10;
-        public bool[] UpRequests ;
+        public bool[] UpRequests;
         public bool[] DownRequests;
 
         public RequestProcessor()
@@ -14,12 +13,8 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             UpRequests = new bool[floorHeight];
             DownRequests = new bool[floorHeight];
         }
-        
-        public bool HasUpRequest => UpRequests.Count(a => a) > 0;
-        public bool HasDownRequest => DownRequests.Count(a => a) > 0;
 
-
-        public void SetRequestStatus(Direction direction,int floor, bool state)
+        public void SetRequestStatus(Direction direction, int floor, bool state)
         {
             if (direction == Direction.Up) UpRequests[floor] = state;
             if (direction == Direction.Down) DownRequests[floor] = state;
@@ -27,7 +22,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
 
         // Requests from upper floors
-        
+
         public int GetUpperFloorUpRequests(int currentFloor)
         {
             for (int i = currentFloor; i < UpRequests.Length; i++)
@@ -49,10 +44,10 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         }
 
         // Request from lower floor
-        
+
         public int GetLowerFloorDownRequests(in int currentFloor)
         {
-            for (int i = currentFloor; i >=0 ; i--)
+            for (int i = currentFloor; i >= 0; i--)
             {
                 if (DownRequests[i]) return i;
             }
@@ -62,7 +57,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
         public int GetLowerFloorUpRequests(int currentFloor)
         {
-            for(var i = currentFloor; i>=0; i--)
+            for (var i = currentFloor; i >= 0; i--)
             {
                 if (UpRequests[i]) return i;
             }
@@ -75,7 +70,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         {
             var upperFloorUpRequest = GetUpperFloorUpRequests(currentFloor);
             var upperFloorDownRequest = GetUpperFloorDownRequest(currentFloor);
-            
+
             var lowerFloorUpRequest = GetLowerFloorUpRequests(currentFloor);
             var lowerFloorDownRequest = GetLowerFloorDownRequests(currentFloor);
 

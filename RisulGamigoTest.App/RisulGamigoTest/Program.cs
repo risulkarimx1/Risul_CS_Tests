@@ -24,6 +24,13 @@ namespace RisulGamigoTest
                     liftController.SummonButtonPushed(9, Direction.Up);
                 }
 
+                if (Console.ReadKey().Key == ConsoleKey.R)
+                {
+                    var direction = Direction.Up;
+                    if (random.Next(0, 100) > 50) direction = Direction.Down;
+                    liftController.SummonButtonPushed(random.Next(0,9), direction);
+                }
+
                 if (Console.ReadKey().Key == ConsoleKey.C)
                 {
                     liftController.FloorButtonPushed(random.Next(0, 9));

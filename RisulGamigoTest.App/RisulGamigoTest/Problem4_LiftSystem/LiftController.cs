@@ -33,78 +33,34 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
                 if (_motor.CurrentDirection == Direction.Up)
                 {
-                    var destination = _processor.GetUpperFloorUpRequests(_motor.CurrentFloor);
+                    var (destination, direction) = _processor.GetAnyRequestFromUpperFloor(_motor.CurrentFloor);
+                    
                     // is there any up request in upper floor
                     if (destination != -1)
                     {
-                        await MoveTowardsAsync(destination, Direction.Up).ConfigureAwait(false);
+                        await MoveTowardsAsync(destination, direction).ConfigureAwait(false);
                     }
-                    // if no up request in upper floor, is there any down request in upper floor
-                    else
-                    {
-                        destination = _processor.GetUpperFloorDownRequest(_motor.CurrentFloor);
-                        if (destination != -1)
-                        {
-                            await MoveTowardsAsync(destination, Direction.Down).ConfigureAwait(false);
-                        }
-                    }
-
                     // if there is no request in upper floors, lets look down, and try to set direction Down
                     if (destination == -1)
                     {
-                        destination = _processor.GetLowerFloorDownRequests(_motor.CurrentFloor);
-                        if (destination == -1)
-                        {
-                            destination = _processor.GetLowerFloorUpRequests(_motor.CurrentFloor);
-                        }
-
+                        var (targetFloor, _) = _processor.GetAnyRequestFromLowerFloor(_motor.CurrentFloor);
                         // if there is any request in lower floors, set the direction down
-                        if (destination != -1)
-                        {
-                            _motor.CurrentDirection = Direction.Down;
-                        }
-                        else // or just become idle
-                        {
-                            _motor.CurrentDirection = Direction.Idle;
-                        }
+                        _motor.CurrentDirection = targetFloor != -1 ? Direction.Down : Direction.Idle;
                     }
                 }
 
                 if (_motor.CurrentDirection == Direction.Down)
                 {
-                    var destination = _processor.GetLowerFloorDownRequests(_motor.CurrentFloor);
+                    var (destination, direction) = _processor.GetAnyRequestFromLowerFloor(_motor.CurrentFloor);
+
                     if (destination != -1)
                     {
-                        await MoveTowardsAsync(destination, Direction.Down).ConfigureAwait(false);
+                        await MoveTowardsAsync(destination, direction).ConfigureAwait(false);
                     }
-                    else
-                    {
-                        destination = _processor.GetLowerFloorUpRequests(_motor.CurrentFloor);
-                        if (destination != -1)
-                        {
-                            await MoveTowardsAsync(destination, Direction.Up).ConfigureAwait(false);
-                        }
-                    }
-
+                    
                     // if no request in down direction, try set the direction up
-                    if (destination == -1)
-                    {
-                        destination = _processor.GetUpperFloorUpRequests(_motor.CurrentFloor);
-                        if (destination == -1)
-                        {
-                            destination = _processor.GetUpperFloorDownRequest(_motor.CurrentFloor);
-                        }
-
-                        if (destination != -1)
-                        {
-                            // has some request in up direction.. set direction up
-                            _motor.CurrentDirection = Direction.Up;
-                        }
-                        else
-                        {
-                            _motor.CurrentDirection = Direction.Idle;
-                        }
-                    }
+                    var (targetFloor, _) = _processor.GetAnyRequestFromUpperFloor(_motor.CurrentFloor);
+                    _motor.CurrentDirection = targetFloor != -1 ? Direction.Up : Direction.Idle;
                 }
 
                 if (!_isDoorOpen)

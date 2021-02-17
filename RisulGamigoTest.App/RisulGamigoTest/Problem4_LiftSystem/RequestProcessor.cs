@@ -21,9 +21,31 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         }
 
 
+        public (int, Direction) GetAnyRequestFromUpperFloor(int currentFloor)
+        {
+            var upRequest = GetUpperFloorUpRequests(currentFloor);
+            if (upRequest != -1) return (upRequest, Direction.Up);
+            var downRequest = GetUpperFloorDownRequest(currentFloor);
+            if (downRequest != -1) return (downRequest, Direction.Down);
+
+            return (-1, Direction.Idle);
+        }
+
+        public (int, Direction) GetAnyRequestFromLowerFloor(int currentFloor)
+        {
+            var downRequest = GetLowerFloorDownRequests(currentFloor);
+            if (downRequest != -1) return (downRequest, Direction.Down);
+
+            var upRequest = GetLowerFloorUpRequests(currentFloor);
+            if (upRequest != -1) return (upRequest, Direction.Up);
+            
+            return (-1, Direction.Idle);
+
+        }
+        
         // Requests from upper floors
 
-        public int GetUpperFloorUpRequests(int currentFloor)
+        private int GetUpperFloorUpRequests(int currentFloor)
         {
             for (int i = currentFloor; i < UpRequests.Length; i++)
             {
@@ -33,7 +55,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             return -1;
         }
 
-        public int GetUpperFloorDownRequest(int currentFloor)
+        private int GetUpperFloorDownRequest(int currentFloor)
         {
             for (int i = currentFloor; i < floorHeight; i++)
             {
@@ -43,9 +65,9 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             return -1;
         }
 
-        // Request from lower floor
+        // Request from lower currentFloor
 
-        public int GetLowerFloorDownRequests(in int currentFloor)
+        private int GetLowerFloorDownRequests(int currentFloor)
         {
             for (int i = currentFloor; i >= 0; i--)
             {
@@ -55,7 +77,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
             return -1;
         }
 
-        public int GetLowerFloorUpRequests(int currentFloor)
+        private int GetLowerFloorUpRequests(int currentFloor)
         {
             for (var i = currentFloor; i >= 0; i--)
             {

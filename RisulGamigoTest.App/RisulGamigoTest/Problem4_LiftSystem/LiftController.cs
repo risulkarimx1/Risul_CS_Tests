@@ -25,7 +25,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         {
             while (true)
             {
-                // if motor at idle, decide whether to go up or down
+                // if motor at idle, make a check if it can go up or down
                 if (_motor.CurrentDirection == Direction.Idle)
                 {
                     GetDirectionFromRequestLookUp();
@@ -41,7 +41,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                         await MoveTowardsAsync(destination, direction).ConfigureAwait(false);
                     }
                     // if there is no request in upper floors, lets look down, and try to set direction Down
-                    if (destination == -1)
+                    else
                     {
                         var (targetFloor, _) = _processor.GetAnyRequestFromLowerFloor(_motor.CurrentFloor);
                         // if there is any request in lower floors, set the direction down
@@ -57,10 +57,13 @@ namespace RisulGamigoTest.Problem4_LiftSystem
                     {
                         await MoveTowardsAsync(destination, direction).ConfigureAwait(false);
                     }
+                    else
+                    {
+                        // if no request in down direction, try set the direction up
+                        var (targetFloor, _) = _processor.GetAnyRequestFromUpperFloor(_motor.CurrentFloor);
+                        _motor.CurrentDirection = targetFloor != -1 ? Direction.Up : Direction.Idle;
+                    }
                     
-                    // if no request in down direction, try set the direction up
-                    var (targetFloor, _) = _processor.GetAnyRequestFromUpperFloor(_motor.CurrentFloor);
-                    _motor.CurrentDirection = targetFloor != -1 ? Direction.Up : Direction.Idle;
                 }
 
                 if (!_isDoorOpen)

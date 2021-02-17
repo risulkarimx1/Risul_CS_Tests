@@ -5,35 +5,29 @@ namespace RisulGamigoTest
 {
     class Program
     {
-        public static Random random = new Random();
+        public static Random _random = new Random();
+        public const int _floorCount = 11;
         static void Main(string[] args)
         {
-            
-            var liftController = new LiftController();
-            
+            IElevatorMotor motor = new ElevatorMotor();
+            IElevatorController controller = new ElevatorController(motor, _floorCount);
+            TakeInput(controller);
+        }
 
+        private static void TakeInput(IElevatorController liftController)
+        {
             while (true)
             {
-                if (Console.ReadKey().Key == ConsoleKey.A)
-                {
-                    liftController.SummonButtonPushed(3, Direction.Up);
-                }
-
-                if (Console.ReadKey().Key == ConsoleKey.B)
-                {
-                    liftController.SummonButtonPushed(9, Direction.Up);
-                }
-
-                if (Console.ReadKey().Key == ConsoleKey.R)
+                if (Console.ReadKey().Key == ConsoleKey.S)
                 {
                     var direction = Direction.Up;
-                    if (random.Next(0, 100) > 50) direction = Direction.Down;
-                    liftController.SummonButtonPushed(random.Next(0,9), direction);
+                    if (_random.Next(0, 100) > 50) direction = Direction.Down;
+                    liftController.SummonButtonPushed(_random.Next(0, _floorCount), direction);
                 }
 
-                if (Console.ReadKey().Key == ConsoleKey.C)
+                if (Console.ReadKey().Key == ConsoleKey.F)
                 {
-                    liftController.FloorButtonPushed(random.Next(0, 9));
+                    liftController.FloorButtonPushed(_random.Next(0, _floorCount));
                 }
             }
         }

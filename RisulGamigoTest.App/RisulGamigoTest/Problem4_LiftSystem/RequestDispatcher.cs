@@ -1,23 +1,62 @@
 ﻿using System;
+using System.Text;
 
 namespace RisulGamigoTest.Problem4_LiftSystem
 {
-    public class RequestProcessor
+    public class RequestDispatcher
     {
-        public int floorHeight = 10;
-        public bool[] UpRequests;
-        public bool[] DownRequests;
+        private readonly int _floorHeight;
+        private readonly bool[] _upRequests;
+        private readonly bool[] _downRequests;
+        private readonly bool[] _summonRequests;
+        private StringBuilder _requestLog;
 
-        public RequestProcessor()
+        public RequestDispatcher(int floorHeight)
         {
-            UpRequests = new bool[floorHeight];
-            DownRequests = new bool[floorHeight];
+            _requestLog = new StringBuilder();
+            _floorHeight = floorHeight;
+            _upRequests = new bool[floorHeight];
+            _downRequests = new bool[floorHeight];
+            _summonRequests = new bool[floorHeight];
+        }
+
+
+        public StringBuilder DisplayUpRequestLog()
+        {
+            return DisplayRequestLog(_upRequests);
+        }
+
+        public StringBuilder DisplayDownRequestLog()
+        {
+            return DisplayRequestLog(_downRequests);
+        }
+
+        private StringBuilder DisplayRequestLog(bool[] request)
+        {
+            _requestLog.Clear();
+            _requestLog.Append("[");
+            for (int i = 0; i < _floorHeight; i++)
+            {
+                if (request[i])
+                {
+                    _requestLog.Append(i);
+                    _requestLog.Append(",");
+                }
+            }
+
+            if (_requestLog.Length > 1)
+            {
+                _requestLog.Remove(_requestLog.Length - 1, 1);
+            }
+
+            _requestLog.Append("]");
+            return _requestLog;
         }
 
         public void SetRequestStatus(Direction direction, int floor, bool state)
         {
-            if (direction == Direction.Up) UpRequests[floor] = state;
-            if (direction == Direction.Down) DownRequests[floor] = state;
+            if (direction == Direction.Up) _upRequests[floor] = state;
+            if (direction == Direction.Down) _downRequests[floor] = state;
         }
 
 
@@ -38,18 +77,17 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
             var upRequest = GetLowerFloorUpRequests(currentFloor);
             if (upRequest != -1) return (upRequest, Direction.Up);
-            
-            return (-1, Direction.Idle);
 
+            return (-1, Direction.Idle);
         }
-        
+
         // Requests from upper floors
 
         private int GetUpperFloorUpRequests(int currentFloor)
         {
-            for (int i = currentFloor; i < UpRequests.Length; i++)
+            for (int i = currentFloor; i < _upRequests.Length; i++)
             {
-                if (UpRequests[i]) return i;
+                if (_upRequests[i]) return i;
             }
 
             return -1;
@@ -57,9 +95,9 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
         private int GetUpperFloorDownRequest(int currentFloor)
         {
-            for (int i = currentFloor; i < floorHeight; i++)
+            for (int i = currentFloor; i < _floorHeight; i++)
             {
-                if (UpRequests[i]) return i;
+                if (_downRequests[i]) return i;
             }
 
             return -1;
@@ -71,7 +109,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         {
             for (int i = currentFloor; i >= 0; i--)
             {
-                if (DownRequests[i]) return i;
+                if (_downRequests[i]) return i;
             }
 
             return -1;
@@ -81,7 +119,7 @@ namespace RisulGamigoTest.Problem4_LiftSystem
         {
             for (var i = currentFloor; i >= 0; i--)
             {
-                if (UpRequests[i]) return i;
+                if (_upRequests[i]) return i;
             }
 
             return -1;
@@ -119,6 +157,16 @@ namespace RisulGamigoTest.Problem4_LiftSystem
 
             if (destination == int.MaxValue) return -1;
             return destination;
+        }
+
+        public void SetSummonRequestStatus(int floor, bool status)
+        {
+            _summonRequests[floor] = status;
+        }
+
+        public bool GetSummonRequestStatus(in int floor)
+        {
+            return _summonRequests[floor];
         }
     }
 }
